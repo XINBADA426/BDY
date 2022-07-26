@@ -44,11 +44,15 @@ def cli():
               default=8,
               type=int,
               help='The thread to use')
-def upload(local, remote, thread):
+@click.option('--ssl-check/--no-ssl-check',
+              default=True,
+              show_default=True,
+              help='SSL Check')
+def upload(local, remote, thread, ssl_check):
     """
     文件上传工具
     """
-    session = BDYP(thread=thread)
+    session = BDYP(thread=thread, ssl_check=ssl_check)
     session.upload(local, remote)
 
 

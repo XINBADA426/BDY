@@ -29,7 +29,7 @@ class BDYP(object):
     百度网盘API的进一步封装
     """
 
-    def __init__(self, thread=4):
+    def __init__(self, thread=4, ssl_check=True):
         """
         初始化百度网盘对象
         """
@@ -41,6 +41,8 @@ class BDYP(object):
 
         # 会话信息
         self.client = openapi_client.ApiClient(pool_threads=thread)
+        if ssl_check is False:
+            self.client.configuration.verify_ssl = False
 
         self._f_token = Path.home().joinpath(".BDY.json")
         self.login()
