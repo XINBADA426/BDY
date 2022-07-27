@@ -40,10 +40,12 @@ class BDYP(object):
         self._SecretKey = "w88HIgI8u7bR4gFNwcdjgvuBxDbKBPTL"
 
         # 会话信息
-        self.client = openapi_client.ApiClient(pool_threads=thread)
+        configuration = openapi_client.configuration.Configuration.get_default_copy()
         if ssl_check is False:
-            self.client.configuration.verify_ssl = False
+            configuration.verify_ssl = False
+        self.client = openapi_client.ApiClient(configuration=configuration, pool_threads=thread)
 
+        # step
         self._f_token = Path.home().joinpath(".BDY.json")
         self.login()
         self.quote()
@@ -116,6 +118,7 @@ class BDYP(object):
 
         TODO: 1. 添加多文件支持
               2. 添加每一步骤的结果验证
+              3. 添加切片步骤
 
         :param local: 本地文件路径
         :param remote: 远程文件路径
@@ -126,11 +129,12 @@ class BDYP(object):
         f_md5 = f"[\"{hashlib.md5(open(local, 'rb').read()).hexdigest()}\"]"
         remote = f"/apps/BDY/{remote}"
         logging.debug(f_md5)
-        obj = fileupload_api.FileuploadApi(self.client)
 
+        obj = fileupload_api.FileuploadApi(self.client)
         # 预上传
         try:
             precreate_response = obj.xpanfileprecreate(self._token, remote, 0, f_size, 1, f_md5, rtype=3)
+
         except BaseException as e:
             logging.error(e)
 
@@ -138,6 +142,7 @@ class BDYP(object):
         try:
             upload_response = obj.pcssuperfile2(self._token, '0', remote, precreate_response['uploadid'], "tmpfile",
                                                 file=handle)
+            logging.debug(upload_response)
         except BaseException as e:
             logging.error(e)
 

@@ -150,7 +150,7 @@ class Configuration(object):
         """Debug switch
         """
 
-        self.verify_ssl = False
+        self.verify_ssl = True
         """SSL/TLS verification
            Set this to false to skip verifying SSL certificate when calling API
            from https server.
