@@ -8,7 +8,6 @@
 """
 
 
-
 class OpenApiException(Exception):
     """The base exception class for all OpenAPIExceptions"""
 
@@ -17,6 +16,7 @@ class ApiTypeError(OpenApiException, TypeError):
     """
     class ApiTypeError
     """
+
     def __init__(self, msg, path_to_item=None, valid_classes=None,
                  key_type=None):
         """ Raises an exception for TypeErrors
@@ -49,6 +49,7 @@ class ApiValueError(OpenApiException, ValueError):
     """
     class ApiValueError
     """
+
     def __init__(self, msg, path_to_item=None):
         """
         Args:
@@ -70,6 +71,7 @@ class ApiAttributeError(OpenApiException, AttributeError):
     """
     class ApiAttributeError
     """
+
     def __init__(self, msg, path_to_item=None):
         """
         Raised when an attribute reference or assignment fails.
@@ -92,6 +94,7 @@ class ApiKeyError(OpenApiException, KeyError):
     """
     class ApiKeyError
     """
+
     def __init__(self, msg, path_to_item=None):
         """
         Args:
@@ -112,6 +115,7 @@ class ApiException(OpenApiException):
     """
     class ApiException
     """
+
     def __init__(self, status=None, reason=None, http_resp=None):
         """
         __init__
@@ -128,12 +132,12 @@ class ApiException(OpenApiException):
             self.headers = None
 
     def __str__(self):
-        """Custom error messages for exception"""
-        error_message = "({0})\n"\
-                        "Reason: {1}\n".format(self.status, self.reason)
+        """
+        Custom error messages for exception
+        """
+        error_message = "({0})\n" "Reason: {1}\n".format(self.status, self.reason)
         if self.headers:
-            error_message += "HTTP response headers: {0}\n".format(
-                self.headers)
+            error_message += "HTTP response headers: {0}\n".format(self.headers)
 
         if self.body:
             error_message += "HTTP response body: {0}\n".format(self.body)
@@ -157,6 +161,7 @@ class UnauthorizedException(ApiException):
     """
     class UnauthorizedException
     """
+
     def __init__(self, status=None, reason=None, http_resp=None):
         """
         __init__
@@ -168,6 +173,7 @@ class ForbiddenException(ApiException):
     """
     class ForbiddenException
     """
+
     def __init__(self, status=None, reason=None, http_resp=None):
         """
         __init__
@@ -179,6 +185,7 @@ class ServiceException(ApiException):
     """
     class ServiceException
     """
+
     def __init__(self, status=None, reason=None, http_resp=None):
         """
         __init__

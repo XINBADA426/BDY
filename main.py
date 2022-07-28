@@ -16,7 +16,7 @@ import click
 #### Some Functions and global variable
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-__version__ = 'v0.0.2'
+__version__ = 'v0.0.3'
 
 
 ########################
@@ -47,13 +47,13 @@ def cli():
 @click.option('--ssl-check/--no-ssl-check',
               default=True,
               show_default=True,
-              help='SSL Check')
+              help='Whether verify host SSL cerificate')
 def upload(local, remote, thread, ssl_check):
     """
     文件上传工具
     """
     session = BDYP(thread=thread, ssl_check=ssl_check)
-    session.upload(local, remote)
+    session.upload_single_force(local, remote)
 
 
 cli.add_command(upload)

@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 
 import requests
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 BASEPATH = Path(__file__).absolute()
@@ -116,9 +116,7 @@ class BDYP(object):
         """
         上传文件
 
-        TODO: 1. 添加多文件支持
-              2. 添加每一步骤的结果验证
-              3. 添加切片步骤
+        TODO: 1. 添加切片上传的支持
 
         :param local: 本地文件路径
         :param remote: 远程文件路径
@@ -134,9 +132,49 @@ class BDYP(object):
         # 预上传
         try:
             precreate_response = obj.xpanfileprecreate(self._token, remote, 0, f_size, 1, f_md5, rtype=3)
+            logging.debug(precreate_response)
+        except openapi_client.ApiException as e:
+            logging.error(f"Pre Create err: {e}")
 
+        # 上传
+        try:
+            upload_response = obj.pcssuperfile2(self._token, '0', remote, precreate_response['uploadid'], "tmpfile",
+                                                file=handle)
+            logging.debug(upload_response)
+        except openapi_client.ApiException as e:
+            logging.error(f"Upload file err:{e}")
+            exit(-1)
+
+        # 创建
+        try:
+            create_response = obj.xpanfilecreate(self._token, remote, 0, f_size, precreate_response['uploadid'], f_md5,
+                                                 rtype=3)
+            logging.debug(create_response)
+        except openapi_client.ApiException as e:
+            logging.error(f"Creat file err: {e}")
+
+    def upload_single_force(self, local, remote):
+        """
+        利用目前 Python API 的 Bug, 即使文件的大小超过2G，如果不考虑接口返回的状态码，依旧可以不分片成功上传(不一定什么时候就没有了)
+
+        :param local: 本地文件路径
+        :param remote: 远程文件路径
+        """
+        local = Path(local).absolute()
+        handle = open(local, 'rb')
+        f_size = local.stat().st_size
+        f_md5 = f"[\"{hashlib.md5(open(local, 'rb').read()).hexdigest()}\"]"
+        remote = f"/apps/BDY/{remote}"
+        logging.debug(f_md5)
+
+        obj = fileupload_api.FileuploadApi(self.client)
+        # 预上传
+        try:
+            precreate_response = obj.xpanfileprecreate(self._token, remote, 0, f_size, 1, f_md5, rtype=3)
+            logging.debug(precreate_response)
         except BaseException as e:
-            logging.error(e)
+            logging.error(f"Pre Create err: {e}")
+            exit(-1)
 
         # 上传
         try:
@@ -144,11 +182,17 @@ class BDYP(object):
                                                 file=handle)
             logging.debug(upload_response)
         except BaseException as e:
-            logging.error(e)
+            if 'string longer than 2147483647 bytes' in str(e):
+                logging.warning(e)
+            else:
+                logging.error(f"Upload file err:{e}")
+                exit(-1)
 
         # 创建
         try:
             create_response = obj.xpanfilecreate(self._token, remote, 0, f_size, precreate_response['uploadid'], f_md5,
                                                  rtype=3)
+            logging.debug(create_response)
         except BaseException as e:
-            logging.error(e)
+            logging.error(f"Creat file err: {e}")
+            exit(-1)
