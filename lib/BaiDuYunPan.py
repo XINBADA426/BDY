@@ -170,29 +170,34 @@ class BDYP(object):
         obj = fileupload_api.FileuploadApi(self.client)
         # 预上传
         try:
-            precreate_response = obj.xpanfileprecreate(self._token, remote, 0, f_size, 1, f_md5, rtype=3)
+            precreate_response = obj.xpanfileprecreate(self._token, remote, 0, f_size, 1, f_md5, rtype=3,
+                                                       async_req=True).get()
             logging.debug(precreate_response)
         except BaseException as e:
-            logging.error(f"Pre Create err: {e}")
+            logging.error(f"预上传错误: {e}")
             exit(-1)
 
         # 上传
+        # try:
         try:
             upload_response = obj.pcssuperfile2(self._token, '0', remote, precreate_response['uploadid'], "tmpfile",
-                                                file=handle)
+                                                file=handle, async_req=True).get()
             logging.debug(upload_response)
         except BaseException as e:
-            if 'string longer than 2147483647 bytes' in str(e):
-                logging.warning(e)
-            else:
-                logging.error(f"Upload file err:{e}")
-                exit(-1)
+            logging.debug("上传错误")
+        # except BaseException as e:
+        #     logging.error(f"Upload has err: {e}, you result may have some problem")
+        # if 'string longer than 2147483647 bytes' in str(e):
+        #     logging.warning(e)
+        # else:
+        #     logging.error(f"Upload file err:{e}")
+        #     exit(-1)
 
         # 创建
         try:
             create_response = obj.xpanfilecreate(self._token, remote, 0, f_size, precreate_response['uploadid'], f_md5,
-                                                 rtype=3)
+                                                 rtype=3, async_req=True).get()
             logging.debug(create_response)
         except BaseException as e:
-            logging.error(f"Creat file err: {e}")
+            logging.error(f"创建文件错误: {e}")
             exit(-1)

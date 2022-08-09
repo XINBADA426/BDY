@@ -14,9 +14,9 @@ from BaiDuYunPan import BDYP
 import click
 
 #### Some Functions and global variable
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-__version__ = 'v0.0.3'
+__version__ = 'v0.0.4'
 
 
 ########################
@@ -48,12 +48,20 @@ def cli():
               default=True,
               show_default=True,
               help='Whether verify host SSL cerificate')
-def upload(local, remote, thread, ssl_check):
+@click.option('--force/--no-force',
+              default=False,
+              show_default=True,
+              help='Whether force upload file')
+def upload(local, remote, thread, ssl_check, force):
     """
     文件上传工具
     """
     session = BDYP(thread=thread, ssl_check=ssl_check)
-    session.upload_single_force(local, remote)
+    if force:
+        logging.warning("强制使用单文件上传，可能会失败，请注意检查md5值")
+        session.upload_single_force(local, remote)
+    else:
+        session.upload(local, remote)
 
 
 cli.add_command(upload)
